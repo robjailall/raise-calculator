@@ -24,6 +24,31 @@ In the rare case when there is enough raise budget to bring everyone up to marke
 
 This script requires python3
 
+    python3 calculate_raise.py -h
+    usage: calculate_raise.py [-h] [--raise_budget RAISE_BUDGET]
+                              [--raise_increment RAISE_INCREMENT]
+                              [--minimum_raise_percent MINIMUM_RAISE_PERCENT]
+                              [--debug]
+                              salary_info salary_bands raise_percent
+    
+    positional arguments:
+      salary_info           TSV containing input salary data
+      salary_bands          TSV with min and max of salary ranges for levels
+      raise_percent         Percent Raise for the org (0-100)
+    
+    optional arguments:
+      -h, --help            show this help message and exit
+      --raise_budget RAISE_BUDGET, -b RAISE_BUDGET
+                            Override raise percent with this budget
+      --raise_increment RAISE_INCREMENT, -i RAISE_INCREMENT
+                            Calculate using this raise increment
+      --minimum_raise_percent MINIMUM_RAISE_PERCENT, -m MINIMUM_RAISE_PERCENT
+                            Minimum raise percent for all employees
+      --debug
+
+
+
+### Examples
 
 To optimally assign a 4.2% raise to the people in `sample_salary_input.tsv` using $1 increments and salary bands in `sample_salary_band_input.tsv`:
 

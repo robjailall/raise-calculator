@@ -222,7 +222,7 @@ def print_salaries(salaries, salary_bands, raise_data):
 
 def main():
     parser = ArgumentParser()
-    parser.add_argument('file', help='TSV containing input salary data')
+    parser.add_argument('salary_info', help='TSV containing input salary data')
     parser.add_argument('salary_bands', help='TSV with min and max of salary ranges for levels')
     parser.add_argument('raise_percent', type=float, help='Percent Raise for the org (0-100)')
     parser.add_argument('--raise_budget', '-b', type=float, help='Override raise percent with this budget')
@@ -232,7 +232,7 @@ def main():
     parser.add_argument('--debug', default=False, action='store_true')
     args = parser.parse_args()
 
-    with open(args.file) as f:
+    with open(args.salary_info) as f:
         salaries, header = parse_salary_data(f)
 
     with open(args.salary_bands) as f:
