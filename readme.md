@@ -47,7 +47,6 @@ This script requires python3
       --debug
 
 
-
 ### Examples
 
 To optimally assign a 4.2% raise to the people in `sample_salary_input.tsv` using $1 increments and salary bands in `sample_salary_band_input.tsv`:
@@ -94,28 +93,28 @@ The script outputs tab-delimited data to standard out in the following format:
     Jill    Judy     2.0    100000.0        125000.0      -25000.0  -0.25                 113107.0           13107.0  0.13107000000000002    -11893.0         -0.10514822247959899     0.14485177752040101
     Jim     Judy     3.5    150000.0        162500.0      -12500.0  -0.08333333333333326  150341.0           341.0    0.0022733333333333494  -12159.0         -0.08087614157149403     0.002457191761839228
 
-In these results, we see that employees who are getting underpaid the most get most of the raise budget -- Jill (-25% -> -10.5%), Jake (-12.5% -> -5.8%), and Jane (-11.25% -> -5.9%). Jerome is overpaid already, so he gets no raise. Jim is close to his market pay, so he gets a small raise.
+In these results, we see that employees who are getting underpaid the most get most of the raise budget -- Jill (`-25% -> -10.5%`), Jake (`-12.5% -> -5.8%`), and Jane (`-11.25% -> -5.9%`). Jerome is overpaid already, so he gets no raise. Jim is close to his market pay, so he gets a small raise.
 
 ### Output Explanation:
 
-- name
-- manager
-- level
-- current salary
-- level salary
+- `name`
+- `manager`
+- `level`
+- `current_salary`
+- `level_salary`
     - This salary is derived from the person's decimal level and the pay bands. 3.5 means they are in the middle of the level 3 pay band
-- deficit
+- `diff`
     - This is the simple difference between the level_salary and current_salary
-- percent deficit
+- `percent_diff`
     - This is the "percent" deficit between where someone's salary is and where it needs to be. This totals what the optimization aims to minimize
-- new salary
-- raise
-- raise percent
-- new deficit
+- `post_raise_salary`
+- `raise`
+- `raise_percent`
+- `post_raise_diff`
     - Same as above but post-raise
-- new percent deficit
+- `post_raise_percent_diff`
     - Same as above but post-raise
-- change in percent deficit
+- `post_raise_percent_change`
     - This is the difference between percent deficit and new percent deficit. The optimization by corrolary maximizes this
 
 ## Tests
