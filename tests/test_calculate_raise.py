@@ -44,7 +44,13 @@ class RaiseCalculatorTest(TestCase):
             _salary_for_level(salary_bands=bands, level=3)
 
     def test_calculate_raise_budget(self):
-        calculate_raise_budget(raise_percent=3, salaries=self.salaries)
+        self.assertEqual((200.0, 6.0, 3.0), calculate_raise_budget(raise_percent=3, salaries=self.salaries))
+
+        self.assertEqual((200.0, 0.0, 0.0),
+                         calculate_raise_budget(raise_percent=3, salaries=self.salaries, force_raise_budget=0.0))
+
+        self.assertEqual((200.0, 48.0, 24.0),
+                         calculate_raise_budget(raise_percent=3, salaries=self.salaries, force_raise_budget=48.0))
 
 
 class OptimizationTest(TestCase):

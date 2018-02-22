@@ -28,12 +28,19 @@ def parse_salary_bands(file):
     return band_data
 
 
-def calculate_raise_budget(raise_percent, salaries):
+def calculate_raise_budget(raise_percent, salaries, force_raise_budget=None):
     total = 0.0
     for eid in salaries:
         employee = salaries[eid]
         total += employee['current_salary']
-    return total, total * (raise_percent / 100.0)
+
+    if force_raise_budget is not None:
+        raise_budget = force_raise_budget
+        raise_percent = ((total + raise_budget) / total - 1) * 100
+    else:
+        raise_budget = total * (raise_percent / 100.0)
+
+    return total, raise_budget, raise_percent
 
 
 def _calculate_score_for_overpaid(curr_salary, level_salary):
@@ -248,7 +255,7 @@ def main():
     parser.add_argument('--raise_budget', '-b', type=float, help='Override raise percent with this budget')
     parser.add_argument('--raise_increment', '-i', type=float, help='Calculate using this raise increment', default=1.0)
     parser.add_argument('--minimum_raise_percent', '-m', type=float, help='Minimum raise percent for all employees',
-                        default=0)
+                        default=0.0)
     parser.add_argument('--debug', default=False, action='store_true')
     args = parser.parse_args()
 
@@ -258,13 +265,9 @@ def main():
     with open(args.salary_bands) as f:
         salary_bands = parse_salary_bands(f)
 
-    total_salaries, raise_budget = calculate_raise_budget(raise_percent=args.raise_percent,
-                                                          salaries=salaries)
-
-    raise_percent = args.raise_percent
-    if args.raise_budget:
-        raise_budget = args.raise_budget
-        raise_percent = ((total_salaries + raise_percent) / total_salaries - 1) * 100
+    total_salaries, raise_budget, raise_percent = calculate_raise_budget(raise_percent=args.raise_percent,
+                                                                         salaries=salaries,
+                                                                         force_raise_budget=args.raise_budget)
 
     raise_data = optimally_assign_dollars(raise_budget=raise_budget, salaries=salaries,
                                           raise_increment=args.raise_increment,
