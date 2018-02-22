@@ -28,12 +28,19 @@ def parse_salary_bands(file):
     return band_data
 
 
-def calculate_raise_budget(raise_percent, salaries):
+def calculate_raise_budget(raise_percent, salaries, force_raise_budget=None):
     total = 0.0
     for eid in salaries:
         employee = salaries[eid]
         total += employee['current_salary']
-    return total, total * (raise_percent / 100.0)
+
+    if force_raise_budget is not None:
+        raise_budget = force_raise_budget
+        raise_percent = ((total + raise_budget) / total - 1) * 100
+    else:
+        raise_budget = total * (raise_percent / 100.0)
+
+    return total, raise_budget, raise_percent
 
 
 def _calculate_score_for_overpaid(curr_salary, level_salary):
@@ -89,17 +96,13 @@ def _salary_for_level(salary_bands, level):
     return salary_bands[band]['min'] + ((salary_bands[band]['max'] - salary_bands[band]['min']) * band_fraction)
 
 
-def _create_optimization_data(salaries, salary_bands, minimum_raise_percent, raise_budget):
+def _create_optimization_data(salaries, salary_bands, raise_budget):
     remaining_budget = raise_budget
     raise_data = []
     for eid in salaries:
         employee = salaries[eid]
         target_salary = _salary_for_level(salary_bands=salary_bands, level=employee['level'])
-
-        # apply minimum raise
-        salary_raise = min(remaining_budget, (minimum_raise_percent / 100.0) * employee['current_salary'])
-        curr_salary = salary_raise + employee['current_salary']
-        remaining_budget -= salary_raise
+        curr_salary = employee['current_salary']
 
         polarity, marginal_percentage, _, _ = _calculate_sort_params(curr_salary=curr_salary,
                                                                      level_salary=target_salary)
@@ -107,7 +110,31 @@ def _create_optimization_data(salaries, salary_bands, minimum_raise_percent, rai
         raise_data.append(
             [polarity, marginal_percentage, curr_salary, target_salary,
              eid])
+
     return raise_data, remaining_budget
+
+
+def _apply_minimum_raise(minimum_raise_percent, raise_budget, raise_data):
+    remaining_budget = raise_budget
+    new_raise_data = []
+    for employee_raise_data in raise_data:
+        current_salary = employee_raise_data[idx_current_salary]
+        target_salary = employee_raise_data[idx_level_salary]
+
+        # apply minimum raise
+        salary_raise = min(remaining_budget, (minimum_raise_percent / 100.0) * current_salary)
+        new_curr_salary = salary_raise + current_salary
+        remaining_budget -= salary_raise
+
+        polarity, marginal_percentage, _, _ = _calculate_sort_params(curr_salary=new_curr_salary,
+                                                                     level_salary=target_salary)
+
+        employee_raise_data[idx_current_salary] = new_curr_salary
+        employee_raise_data[idx_polarity] = polarity
+        employee_raise_data[idx_marginal_percent] = marginal_percentage
+        new_raise_data.append(employee_raise_data)
+
+    return new_raise_data, remaining_budget
 
 
 def _apply_budget_greedily(optimization_data, remaining_budget, raise_increment):
@@ -153,8 +180,10 @@ def optimally_assign_dollars(raise_budget, salaries, salary_bands, raise_increme
     """
 
     optimization_data, remaining_budget = _create_optimization_data(salaries=salaries, salary_bands=salary_bands,
-                                                                    minimum_raise_percent=minimum_raise_percent,
                                                                     raise_budget=raise_budget)
+
+    optimization_data, remaining_budget = _apply_minimum_raise(minimum_raise_percent=minimum_raise_percent,
+                                                               raise_budget=raise_budget, raise_data=optimization_data)
 
     if debug:
         for item in sorted(list(optimization_data)):
@@ -185,7 +214,7 @@ def _calculate_raise_stats(items, employee_salary_data, salary_bands):
         employee_raise_stats['post_raise_percent_diff'] = _calculate_percent_deficit(
             curr_salary=item[idx_current_salary], level_salary=target_salary)
         employee_raise_stats['post_raise_percent_change'] = employee_raise_stats['post_raise_percent_diff'] - \
-                                                           employee_raise_stats['percent_diff']
+                                                            employee_raise_stats['percent_diff']
         raise_stats[employee['name']] = employee_raise_stats
     return raise_stats
 
@@ -226,7 +255,7 @@ def main():
     parser.add_argument('--raise_budget', '-b', type=float, help='Override raise percent with this budget')
     parser.add_argument('--raise_increment', '-i', type=float, help='Calculate using this raise increment', default=1.0)
     parser.add_argument('--minimum_raise_percent', '-m', type=float, help='Minimum raise percent for all employees',
-                        default=0)
+                        default=0.0)
     parser.add_argument('--debug', default=False, action='store_true')
     args = parser.parse_args()
 
@@ -236,13 +265,9 @@ def main():
     with open(args.salary_bands) as f:
         salary_bands = parse_salary_bands(f)
 
-    total_salaries, raise_budget = calculate_raise_budget(raise_percent=args.raise_percent,
-                                                          salaries=salaries)
-
-    raise_percent = args.raise_percent
-    if args.raise_budget:
-        raise_budget = args.raise_budget
-        raise_percent = ((total_salaries + raise_percent) / total_salaries - 1) * 100
+    total_salaries, raise_budget, raise_percent = calculate_raise_budget(raise_percent=args.raise_percent,
+                                                                         salaries=salaries,
+                                                                         force_raise_budget=args.raise_budget)
 
     raise_data = optimally_assign_dollars(raise_budget=raise_budget, salaries=salaries,
                                           raise_increment=args.raise_increment,

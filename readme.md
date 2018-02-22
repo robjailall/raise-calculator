@@ -121,4 +121,4 @@ In these results, we see that employees who are getting underpaid the most get m
 
 To run tests:
 
-    python -m unittest tests/test_calculate_raise.py
+    python -m unittest discover -s tests
