@@ -6,15 +6,17 @@ This script calculates raises for employees given a raise budget, employee level
 
 This script assumes several prerequisites:
 
-- Some sort of performance review has already taken place and employee levels have already been changed to reflect that performance review. 
+- Some sort of performance review has already taken place, taking into account an employee's performance most recently, and employee levels have already been changed to reflect that performance review. The final level represents what the employee is worth to the company and, hence, what they should be paid.
+- Salary bands are up-to-date and presumably have been adjusted to match the current market.
 - **Finance** has set a raise budget, either in terms of percent of current employee payroll or a dollar amount.
-- Salary bands are up-to-date and presumably have been adjusted to match the current market
 
 ## Philosophy
 
 Employees view pay as fair if their pay is close to their market rate, the rate determined by their employee level and _up-to-date_ pay bands (let's take the leap and say that employee level accurately represents and employee's marketable skills). The farther their pay is below market rate in percentage terms, the more unhappy they will be. An employee getting paid $100,000 when they should be getting paid $110,000 is going to be more unhappy than an employee getting paid $200,000 who should be getting paid $210,000.
 
 Thus, given a limited raise budget, the most fair raise allocation minimizes the percentage deficit between what employees are getting paid and what they should be paid. So, this script allocates each raise dollar to make the maximum reduction in this percentage deficit across all employees.
+
+Common raise schemes such as increasing everyone's salary by a fixed percentage (or a fixed percentage by performance review rating) do not take into account how underpaid someone is already. Furthermore, it makes it much harder for lowly-paid (junior) employees to catch up to their market rate, especially since employees tend to move through the lower levels more quickly than the upper levels.
 
 In the rare case when there is enough raise budget to bring everyone up to market rate, this script spreads the remaining budget across employees equally in dollar terms. (In this case, a similar philosophy applies: someone getting paid $100,000 is going to be much happier to get $1000 extra dollars versus someone who is getting paid $200,000 who gets an extra $2000 because of the diminishing marginal return of happiness.)
 
@@ -42,10 +44,11 @@ To optimally assign a $100,000 to the people in `sample_salary_input.tsv` using 
 
 The script takes in a tab-delimited file of salary information with columns in the following format:
 
-    name	manager	level	current_salary
-    jim	Ellen	1	107764
-    bob	Steve	1	125159
-    jones	Steve	1	163823
+    name    manager  level  current_salary
+    Jane    Ellen    5.9    200000
+    Jake    Ellen    6      200000
+    Jerome  Steve    4.3    210000
+    Jill    Judy     2      100000
     
 It takes a tab-delimited file with salary band information:
 
@@ -66,7 +69,9 @@ The script outputs tab-delimited data to standard out in the following format:
     Jill    Judy     2.0    100000.0        125000.0      -25000.0  -0.25                 113107.0           13107.0  0.13107000000000002    -11893.0         -0.10514822247959899     0.14485177752040101
     Jim     Judy     3.5    150000.0        162500.0      -12500.0  -0.08333333333333326  150341.0           341.0    0.0022733333333333494  -12159.0         -0.08087614157149403     0.002457191761839228
 
+In these results, we see that employees who are getting underpaid the most get most of the raise budget -- Jill (-25% -> -10.5%), Jake (-12.5% -> -5.8%), and Jane (-11.25% -> -5.9%). Jerome is overpaid already, so he gets no raise. Jim is close to his market pay, so he gets a small raise.
 
+### Output Explanation:
 
 - name
 - manager
