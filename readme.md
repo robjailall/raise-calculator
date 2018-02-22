@@ -18,7 +18,7 @@ Thus, given a limited raise budget, the most fair raise allocation minimizes the
 
 Common raise schemes such as increasing everyone's salary by a fixed percentage (or a fixed percentage by performance review rating) do not take into account how underpaid someone is already. Furthermore, it makes it much harder for lowly-paid (junior) employees to catch up to their market rate, especially since employees tend to move through the lower levels more quickly than the upper levels.
 
-In the rare case when there is enough raise budget to bring everyone up to market rate, this script spreads the remaining budget across employees equally in dollar terms. (In this case, a similar philosophy applies: someone getting paid $100,000 is going to be much happier to get $1000 extra dollars versus someone who is getting paid $200,000 who gets an extra $2000 because of the diminishing marginal return of happiness.)
+In the rare case when there is enough raise budget to bring everyone up to market rate, this script spreads the remaining budget across employees equally in dollar terms. (In this case, a similar philosophy applies because of the diminishing marginal return of happiness: someone getting paid $100,000 is going to be much happier to get $1000 extra dollars versus someone who is getting paid $200,000 who gets an extra $2000.)
 
 ## Usage
 
