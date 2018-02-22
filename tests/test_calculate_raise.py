@@ -33,9 +33,6 @@ class RaiseCalculatorTest(TestCase):
         with self.assertRaises(Exception):
             _salary_for_level(salary_bands=bands, level=3)
 
-    def test__calculate_sort_params(self):
-        pass
-
 
 class CreateOptimizationDataTest(TestCase):
 

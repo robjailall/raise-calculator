@@ -132,7 +132,6 @@ def _apply_budget_greedily(optimization_data, remaining_budget, raise_increment)
 
         remaining_budget -= raise_increment
 
-    # Calculate final stats
     items = []
     while marginal_percentage_increase.qsize() > 0:
         items.append(marginal_percentage_increase.get())
@@ -161,7 +160,6 @@ def optimally_assign_dollars(raise_budget, salaries, salary_bands, raise_increme
         for item in sorted(list(optimization_data)):
             print(item, file=sys.stderr)
 
-    # Calculate final stats
     items = _apply_budget_greedily(optimization_data=optimization_data, remaining_budget=remaining_budget,
                                    raise_increment=raise_increment)
 
@@ -197,7 +195,7 @@ def _calculate_percent_deficit(curr_salary, level_salary):
     if post_raise_diff < 0:
         post_raise_percent_diff = -1 * ((level_salary / curr_salary) - 1)
     else:
-        post_raise_percent_diff = 0  # (curr_salary/level_salary)
+        post_raise_percent_diff = 0
     return post_raise_percent_diff
 
 
