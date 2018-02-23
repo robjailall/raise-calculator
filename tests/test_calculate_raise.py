@@ -54,14 +54,6 @@ class RaiseCalculatorTest(TestCase):
         self.assertEqual((200.0, 48.0, 24.0),
                          calculate_raise_budget(raise_percent=3, salaries=self.salaries, force_raise_budget=48.0))
 
-
-class OptimizationTest(TestCase):
-
-    def setUp(self):
-        super(OptimizationTest, self).setUp()
-        self.bands = sample_bands.copy()
-        self.salaries = sample_salaries.copy()
-
     def _assert_optimization_lists_equal(self, expected, actual):
         """
         We don't care about the second parameter. That's tested in a test__calculate_sort_params
