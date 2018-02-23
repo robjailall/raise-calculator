@@ -4,6 +4,8 @@ from calculate_raise import calculate_raise_budget
 from calculate_raise import _apply_budget_greedily
 from calculate_raise import _apply_minimum_raise
 from calculate_raise import _calculate_percent_deficit
+from calculate_raise import _calculate_score_for_overpaid
+from calculate_raise import _calculate_score_for_underpaid
 from calculate_raise import _calculate_sort_params
 from calculate_raise import _create_optimization_data
 from calculate_raise import _salary_for_level
@@ -102,17 +104,6 @@ class OptimizationTest(TestCase):
         ]
         self._assert_optimization_lists_equal(expected_output, optimization_data)
 
-    def test_should_handle_no_raise_budget(self):
-        salaries = self.salaries
-        optimization_data, remaining_budget = _create_optimization_data(salaries=salaries, salary_bands=self.bands,
-                                                                        raise_budget=0)
-        self.assertEqual(0, remaining_budget)
-        expected_output = [
-            [1, -1.0, 100.0, 100.0, 'james'],
-            [-1, .005, 100.0, 200.0, 'bob']
-        ]
-        self._assert_optimization_lists_equal(expected_output, optimization_data)
-
     def test__calculate_sort_params(self):
         # sorted from high to low
         expected_output = [
@@ -124,11 +115,11 @@ class OptimizationTest(TestCase):
         ]
 
         output = [
-            _calculate_sort_params(curr_salary=250, level_salary=200),
-            _calculate_sort_params(curr_salary=201, level_salary=200),
-            _calculate_sort_params(curr_salary=200, level_salary=200),
-            _calculate_sort_params(curr_salary=150, level_salary=200),
-            _calculate_sort_params(curr_salary=100, level_salary=200)
+            _calculate_sort_params(current_salary=250, level_salary=200),
+            _calculate_sort_params(current_salary=201, level_salary=200),
+            _calculate_sort_params(current_salary=200, level_salary=200),
+            _calculate_sort_params(current_salary=150, level_salary=200),
+            _calculate_sort_params(current_salary=100, level_salary=200)
         ]
 
         # sort from high to low to matched expected
@@ -154,3 +145,20 @@ class OptimizationTest(TestCase):
         ]
 
         self._assert_optimization_lists_equal(expected_output, raises)
+
+    def test__calculate_score_for_overpaid(self):
+        # higher score gets raised more
+        self.assertEqual(0.0, _calculate_score_for_overpaid(current_salary=130.0, level_salary=130.0))
+        self.assertEqual(-1.0, _calculate_score_for_overpaid(current_salary=131.0, level_salary=130.0))
+        self.assertEqual(-20.0, _calculate_score_for_overpaid(current_salary=150.0, level_salary=130.0))
+        with self.assertRaises(Exception):
+            _calculate_score_for_overpaid(current_salary=0.0, level_salary=130.0)
+
+    def test__calculate_score_for_underpaid(self):
+        # higher score gets raised more
+        self.assertEqual(0.0, _calculate_score_for_underpaid(current_salary=0.0, level_salary=130.0))
+        self.assertEqual(-0.004807692307692308, _calculate_score_for_underpaid(current_salary=50.0, level_salary=130.0))
+        self.assertEqual(-0.9923076923076923, _calculate_score_for_underpaid(current_salary=129.0, level_salary=130.0))
+        self.assertEqual(-1.0, _calculate_score_for_underpaid(current_salary=130.0, level_salary=130.0))
+        with self.assertRaises(Exception):
+            _calculate_score_for_underpaid(current_salary=131.0, level_salary=130.0)
