@@ -43,46 +43,48 @@ def calculate_raise_budget(raise_percent, salaries, force_raise_budget=None):
     return total, raise_budget, raise_percent
 
 
-def _calculate_score_for_overpaid(curr_salary, level_salary):
+def _calculate_score_for_overpaid(current_salary, level_salary):
     """
     Spread dollars out equally among people paid above their level. Higher scores get raise dollars first
-    :param curr_salary:
+    :param current_salary:
     :param level_salary:
     :return:
     """
-    return -(curr_salary - level_salary)
+    assert current_salary >= level_salary
+    return -(current_salary - level_salary)
 
 
-def _calculate_score_for_underpaid(curr_salary, level_salary):
+def _calculate_score_for_underpaid(current_salary, level_salary):
     """
     Maximize how much each dollar reduces percent diff from level salary. Higher scores get raise dollars first
-    :param curr_salary:
+    :param current_salary:
     :param level_salary:
     :return:
     """
-    absolute_diff = curr_salary - level_salary
-    percent_diff = curr_salary / level_salary
+    assert current_salary <= level_salary
+    absolute_diff = current_salary - level_salary
+    percent_diff = current_salary / level_salary
     if absolute_diff != 0:
         marginal_percentage = percent_diff / absolute_diff
     else:
-        marginal_percentage = 0
+        marginal_percentage = -1.0
     return marginal_percentage
 
 
-def _calculate_sort_params(curr_salary, level_salary):
+def _calculate_sort_params(current_salary, level_salary):
     """
     Use to sort employees so that we prioritize employees where a marginal dollar will have a huge impact on their
     salary deficit
     """
 
-    absolute_diff = curr_salary - level_salary
+    absolute_diff = current_salary - level_salary
     polarity = 1 if absolute_diff >= 0 else -1
-    percent_diff = curr_salary / level_salary
+    percent_diff = current_salary / level_salary
 
     if polarity == 1:
-        marginal_percentage = _calculate_score_for_overpaid(curr_salary, level_salary)
+        marginal_percentage = _calculate_score_for_overpaid(current_salary=current_salary, level_salary=level_salary)
     else:
-        marginal_percentage = _calculate_score_for_underpaid(curr_salary=curr_salary, level_salary=level_salary)
+        marginal_percentage = _calculate_score_for_underpaid(current_salary=current_salary, level_salary=level_salary)
 
     # it's a min heap so have to negate marginal_percentage
     return polarity, -marginal_percentage, absolute_diff, percent_diff
@@ -104,7 +106,7 @@ def _create_optimization_data(salaries, salary_bands, raise_budget):
         target_salary = _salary_for_level(salary_bands=salary_bands, level=employee['level'])
         curr_salary = employee['current_salary']
 
-        polarity, marginal_percentage, _, _ = _calculate_sort_params(curr_salary=curr_salary,
+        polarity, marginal_percentage, _, _ = _calculate_sort_params(current_salary=curr_salary,
                                                                      level_salary=target_salary)
 
         raise_data.append(
@@ -126,7 +128,7 @@ def _apply_minimum_raise(minimum_raise_percent, raise_budget, raise_data):
         new_curr_salary = salary_raise + current_salary
         remaining_budget -= salary_raise
 
-        polarity, marginal_percentage, _, _ = _calculate_sort_params(curr_salary=new_curr_salary,
+        polarity, marginal_percentage, _, _ = _calculate_sort_params(current_salary=new_curr_salary,
                                                                      level_salary=target_salary)
 
         employee_raise_data[idx_current_salary] = new_curr_salary
@@ -150,7 +152,7 @@ def _apply_budget_greedily(optimization_data, remaining_budget, raise_increment)
         item[idx_current_salary] += raise_increment
 
         polarity, marginal_percentage, diff, pdiff = _calculate_sort_params(
-            curr_salary=item[idx_current_salary], level_salary=item[idx_level_salary])
+            current_salary=item[idx_current_salary], level_salary=item[idx_level_salary])
 
         item[idx_polarity] = polarity
         item[idx_marginal_percent] = marginal_percentage
