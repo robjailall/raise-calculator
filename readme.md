@@ -12,7 +12,7 @@ This script assumes several prerequisites:
 
 ## Philosophy
 
-Employees view pay as fair if their pay is close to their market rate, the rate determined by their employee level and _up-to-date_ pay bands (let's take the leap and say that employee level accurately represents and employee's marketable skills). The farther their pay is below market rate in percentage terms, the more unhappy they will be. An employee getting paid $100,000 when they should be getting paid $110,000 is going to be more unhappy than an employee getting paid $200,000 who should be getting paid $210,000.
+Employees view pay as fair if their pay is close to their market rate, the rate determined by their employee level and _up-to-date_ pay bands (let's take the leap and say that employee level accurately represents an employee's marketable skills). The farther their pay is below market rate in percentage terms, the more unhappy they will be. An employee getting paid $100,000 when they should be getting paid $110,000 is going to be more unhappy than an employee getting paid $200,000 who should be getting paid $210,000.
 
 Thus, given a limited raise budget, the most fair raise allocation minimizes the percentage deficit between what employees are getting paid and what they should be paid. So, this script allocates each raise dollar to make the maximum reduction in this percentage deficit across all employees.
 
